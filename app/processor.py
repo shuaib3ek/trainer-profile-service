@@ -1,4 +1,4 @@
-import io, os, zipfile, tempfile, base64, json
+import io, os, base64, json
 from typing import Dict, Any
 import pdfplumber
 from docx import Document
@@ -33,11 +33,16 @@ def process_resume(file_bytes: bytes, openai_key: str):
     if not raw_text.strip():
         raw_text = " "
 
-    data = call_openai_structured(raw_text, openai_key)
+    try:
+        data = call_openai_structured(raw_text, openai_key)
+    except Exception as e:
+        # fallback if OpenAI call fails
+        print(f"OpenAI error: {e}")
+        data = {}
 
     # --- fallback if name missing ---
     if not data.get("Full_Name"):
-        first_line = raw_text.splitlines()[0].strip()
+        first_line = raw_text.splitlines()[0].strip() if raw_text else ""
         if 2 <= len(first_line.split()) <= 4:
             data["Full_Name"] = first_line
         else:
@@ -98,7 +103,8 @@ def call_openai_structured(text: str, openai_key: str) -> Dict[str, Any]:
     content = resp.choices[0].message.content if resp and resp.choices else "{}"
     try:
         return json.loads(_extract_json(content))
-    except Exception:
+    except Exception as e:
+        print(f"JSON parse error: {e}")
         return {}
 
 
@@ -111,7 +117,7 @@ def _extract_json(s: str) -> str:
     start, end = s.find("{"), s.rfind("}")
     if start != -1 and end != -1 and end > start:
         return s[start:end+1]
-    return s
+    return "{}"
 
 
 # -----------------------------
