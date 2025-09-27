@@ -1,0 +1,29 @@
+# Git & VCS
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info
+*.egg
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# macOS junk
+.DS_Store
+
+# Logs
+*.log
+
+# Local configs
+.env
+
+# IDE configs
+.vscode/
+.idea/

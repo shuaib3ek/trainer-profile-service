@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 30px 25px 30px 50px; /* reduced left/right margins */
+      line-height: 1.5;
+      color: #222;
+      font-size: 13px;
+      position: relative;
+    }
+
+    /* Sidebar band */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 40px;
+      height: 100%;
+      background: #0a4d5f;
+      border-top-left-radius: 12px;
+      border-bottom-left-radius: 12px;
+    }
+
+    /* Watermark logo (all pages) */
+    .watermark {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.07;
+      z-index: -1;
+      pointer-events: none;
+      width: 100%;
+      text-align: center;
+    }
+
+    .watermark img {
+      max-width: 35%;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .header img {
+      max-height: 45px;
+    }
+
+    .trainer-name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #0a4d5f;
+    }
+
+    h3 {
+      font-size: 14px;
+      margin-top: 18px;
+      margin-bottom: 8px;
+      color: #0a4d5f;
+      text-transform: uppercase;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 3px;
+    }
+
+    p {
+      margin: 0 0 10px 0;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    li {
+      margin-bottom: 5px;
+    }
+
+    .skills p {
+      margin: 3px 0;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 11px;
+      text-align: center;
+      color: #555;
+      border-top: 1px solid #ddd;
+      padding-top: 6px;
+    }
+
+    .footer .brand {
+      color: #0a4d5f;
+      font-weight: bold;
+    }
+
+    .footer svg {
+      vertical-align: middle;
+      margin-right: 4px;
+      fill: #555;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar"></div>
+
+  <!-- Watermark -->
+  <div class="watermark">
+    <img src="{{ logo_b64 }}" alt="Watermark Logo">
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <img src="{{ logo_b64 }}" alt="Logo">
+    <div class="trainer-name">{{ Full_Name or "Trainer" }}</div>
+  </div>
+
+  <!-- Professional Summary -->
+  {% if Professional_Summary %}
+  <h3>Professional Summary</h3>
+  <p>{{ Professional_Summary }}</p>
+  {% endif %}
+
+  <!-- Certifications -->
+  {% if Certifications %}
+  <h3>Certifications</h3>
+  <ul>
+    {% for c in Certifications %}
+      <li>{{ c }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <!-- Work Experience -->
+  {% if Work_Experience %}
+  <h3>Work Experience</h3>
+  <ul>
+    {% for exp in Work_Experience %}
+      <li>{{ exp }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <!-- Training Experience -->
+  {% if Training_Experience %}
+  <h3>Training Experience</h3>
+  <ul>
+    {% for t in Training_Experience %}
+      <li>{{ t }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <!-- Clients -->
+  {% if Clients %}
+  <h3>Clients</h3>
+  <p>
+    {% for client in Clients %}
+      {{ client }}{% if not loop.last %}, {% endif %}
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  <!-- Skill Set -->
+  {% if Skill_Set %}
+  <h3>Key Skill Set</h3>
+  <div class="skills">
+    {% for category, skills in Skill_Set.items() %}
+      <p><strong>{{ category }}</strong>: {{ ", ".join(skills) }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Footer -->
+  <div class="footer">
+    <span class="brand">3 essential keys</span> &nbsp; | &nbsp;
+    <!-- Email icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16">
+      <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v.217l-8 4.8-8-4.8V4z"/>
+      <path d="M0 6.383v5.634l5.803-3.482L0 6.383zm6.761 3.98 1.239.744 1.239-.744L16 12.017V6.383l-5.803 3.152L8 12.017l-1.239-.744L0 6.383z"/>
+    </svg>
+    fathima@3ek.in
+    &nbsp; | &nbsp;
+    <!-- Phone icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16">
+      <path d="M3.654 1.328a.678.678 0 0 1 1.015-.063l2.29 2.29a.678.678 0 0 1-.063 1.015l-1.012.81a.678.678 0 0 0-.157.851c.45.902 1.107 1.754 1.962 2.609.855.855 1.707 1.512 2.609 1.962a.678.678 0 0 0 .851-.157l.81-1.012a.678.678 0 0 1 1.015-.063l2.29 2.29a.678.678 0 0 1-.063 1.015l-1.013.81c-.272.218-.64.287-1.012.172-1.45-.457-2.895-1.342-4.337-2.784C4.994 9.91 4.109 8.465 3.652 7.015c-.115-.372-.046-.74.172-1.012l.83-1.013z"/>
+    </svg>
+    +91 9740048340
+  </div>
+</body>
+</html>

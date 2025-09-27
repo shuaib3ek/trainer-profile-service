@@ -1,0 +1,23 @@
+# Virtual env
+.venv/
+env/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# macOS junk
+.DS_Store
+
+# Logs
+*.log
+
+# Bytecode
+*.egg-info/
+*.egg
+
+# Local configs
+.env
