@@ -1,37 +1,37 @@
-import os
-import io
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, Form, Query
 from fastapi.responses import StreamingResponse, JSONResponse
 from app.processor import process_resume
+import io, base64
 
 router = APIRouter()
 
 @router.post("/format-profile")
-async def format_profile(file: UploadFile = File(...)):
+async def format_profile(
+    file: UploadFile,
+    openai_key: str = Form(...),
+    debug: bool = Query(False)
+):
+    file_bytes = await file.read()
     try:
-        file_bytes = await file.read()
+        pdf_bytes, trainer_name, debug_text_path, debug_html_path = process_resume(file_bytes, openai_key)
 
-        # Get OpenAI key from environment variable
-        openai_key = os.getenv("OPENAI_API_KEY")
-        if not openai_key:
-            return JSONResponse(
-                status_code=500,
-                content={"error": "OPENAI_API_KEY is not set in server environment."},
-            )
+        if debug:
+            # Return debug files as base64 so you can see in Render
+            with open(debug_text_path, "r", encoding="utf-8") as f:
+                raw_text = f.read()
+            with open(debug_html_path, "r", encoding="utf-8") as f:
+                html_preview = f.read()
 
-        pdf_bytes, trainer_name = process_resume(file_bytes, openai_key)
+            return JSONResponse({
+                "trainer_name": trainer_name,
+                "raw_text": raw_text[:1000],       # preview text
+                "html_preview": html_preview[:2000], # preview HTML
+                "pdf_base64": base64.b64encode(pdf_bytes).decode()
+            })
 
-        # Return as downloadable PDF
-        headers = {
-            "Content-Disposition": f'attachment; filename="{trainer_name}.pdf"'
-        }
-        return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf", headers=headers)
+        # Default: return PDF directly
+        return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf",
+                                 headers={"Content-Disposition": f"attachment; filename={trainer_name}.pdf"})
 
     except Exception as e:
-        # Log the error in server logs
-        print(f"Error in /format-profile: {e}")
-
-        return JSONResponse(
-            status_code=500,
-            content={"error": f"Internal server error: {str(e)}"},
-        )
+        return JSONResponse({"error": f"Internal server error: {e}"}, status_code=500)

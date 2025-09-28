@@ -4,7 +4,7 @@ import pdfplumber
 from docx import Document
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
-from openai import OpenAI
+import openai
 
 SYSTEM_PROMPT = """
 You are an expert resume parser. Given raw resume text, output ONLY JSON with fields:
@@ -36,7 +36,6 @@ def process_resume(file_bytes: bytes, openai_key: str):
     try:
         data = call_openai_structured(raw_text, openai_key)
     except Exception as e:
-        # fallback if OpenAI call fails
         print(f"OpenAI error: {e}")
         data = {}
 
@@ -48,10 +47,21 @@ def process_resume(file_bytes: bytes, openai_key: str):
         else:
             data["Full_Name"] = "Trainer"
 
+    # Save debug text
+    debug_text_path = "debug_text.txt"
+    with open(debug_text_path, "w", encoding="utf-8") as f:
+        f.write(raw_text)
+
+    # Render HTML
     html = render_html(data)
+    debug_html_path = "debug_output.html"
+    with open(debug_html_path, "w", encoding="utf-8") as f:
+        f.write(html)
+
+    # PDF
     pdf_bytes = html_to_pdf(html)
 
-    return pdf_bytes, data.get("Full_Name", "Trainer")
+    return pdf_bytes, data.get("Full_Name", "Trainer"), debug_text_path, debug_html_path
 
 
 # -----------------------------
@@ -90,9 +100,9 @@ def extract_text_safely(file_bytes: bytes) -> str:
 # OpenAI call
 # -----------------------------
 def call_openai_structured(text: str, openai_key: str) -> Dict[str, Any]:
-    client = OpenAI(api_key=openai_key)
+    openai.api_key = openai_key
     prompt_user = USER_PROMPT_TEMPLATE.format(text=text)
-    resp = client.chat.completions.create(
+    resp = openai.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -132,7 +142,8 @@ def render_html(data: Dict[str, Any]) -> str:
 
 def html_to_pdf(html: str) -> bytes:
     pdf_io = io.BytesIO()
-    HTML(string=html, base_url=os.getcwd()).write_pdf(pdf_io)
+    document = HTML(string=html, base_url=os.getcwd()).render()
+    document.write_pdf(pdf_io)
     return pdf_io.getvalue()
 
 
